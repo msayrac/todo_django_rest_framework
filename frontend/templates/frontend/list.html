@@ -125,71 +125,83 @@
 
 		var activeItem = null
 		var list_snapshot = []
+	
+		buildList()
+		function buildList(){
 
+			var wrapper = document.getElementById('list-wrapper')
+			wrapper.innerHTML = ''
 
-			buildList()
+			var url = 'http://127.0.0.1:8000/api/task-list/'
 
-			function buildList(){
+			fetch(url)
+			.then((resp)=>resp.json())
+			.then(function(data){
+				console.log('Data:', data)
 
-				var wrapper = document.getElementById('list-wrapper')
-				wrapper.innerHTML = ''
-
-				var url = 'http://127.0.0.1:8000/api/task-list/'
-
-				fetch(url)
-				.then((resp)=>resp.json())
-				.then(function(data){
-					console.log('Data:', data)
-
-					var list = data
-					for (var i in list){
-						var item =`
-						<div id="data-row-${i}" class="task-wrapper flex-wrapper">
-							<div style="flex:7">
-								<span class="title">${list[i].title}</span>
-							</div>
-
-							<div style="flex:1">
-								<button class="btn btn-sm btn-outline-info edit">Edit</button>
-							</div>
-
-							<div style="flex:1">
-								<button class="btn btn-sm btn-outline-danger delete">Delete</button>
-							</div>
+				var list = data
+				for (var i in list){
+					var item =`
+					<div id="data-row-${i}" class="task-wrapper flex-wrapper">
+						<div style="flex:7">
+							<span class="title">${list[i].title}</span>
 						</div>
-					`
-					wrapper.innerHTML += item
-					}
-				})
 
+						<div style="flex:1">
+							<button class="btn btn-sm btn-outline-info edit">Edit</button>
+						</div>
+
+						<div style="flex:1">
+							<button class="btn btn-sm btn-outline-danger delete">Delete</button>
+						</div>
+					</div>
+				`
+					wrapper.innerHTML += item			
+				}
+
+				for (var i in list){
+					var editBtn = document.getElementsByClassName('edit')[i]
+					editBtn.addEventListener('click', (function(item){
+						return function(){
+							editItem(item)
+						}
+					})(list[i]))
+				}
+			})
+		}
+
+		var form = document.getElementById('form-wrapper')
+		form.addEventListener('submit', function(e){
+			e.preventDefault()
+			console.log('Form Submitted')
+			var url = 'http://127.0.0.1:8000/api/task-create/'
+
+			if (activeItem != null){
+				var url = `http://127.0.0.1:8000/api/task-update/${activeItem.id}/`
+				activeItem = null
 			}
 
 
-			var form = document.getElementById('form-wrapper')
-			form.addEventListener('submit', function(e){
-				e.preventDefault()
-				console.log('Form Submitted')
-				var url = 'http://127.0.0.1:8000/api/task-create/'
 
-				var title = document.getElementById('title').value
-
-				fetch(url, {
-					method: 'POST',
-					headers:{
-						'Content-type':'application/json',
-						'X-CSRFToken':csrftoken,
-					},
-					body:JSON.stringify({'title':title})
-				}).then(function(response){
-					buildList()
-					document.getElementById('form').reset()
-
-				})
-
-
+			var title = document.getElementById('title').value
+			fetch(url, {
+				method: 'POST',
+				headers:{
+					'Content-type':'application/json',
+					'X-CSRFToken':csrftoken,
+				},
+				body:JSON.stringify({'title':title})
+			}).then(function(response){
+				buildList()
+				document.getElementById('form').reset()
 			})
+		})
 
-
+		function editItem(item){
+			console.log('item clicked :', item)
+			activeItem = item
+			document.getElementById('title').value = activeItem.title
+		}
     </script>
     
 </body>
