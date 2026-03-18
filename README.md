@@ -1,5 +1,5 @@
 # Todo App | Django REST Framework & Ajax
-- A simple Todo List web application built using Django, Django REST Framework
+A simple Todo List web application built using Django, Django REST Framework
 
 ## Features
 - Create new task
